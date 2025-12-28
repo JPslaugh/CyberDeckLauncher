@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/headerText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="user@m308:~$"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="[00:00:00]"
+            android:textColor="#00FF00"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="16dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#00FF00"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Pinned Apps Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="> PINNED_APPS"
+            android:textColor="#00FFFF"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/pinnedAppsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp" />
+
+        <!-- System Info Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="> SYSTEM_INFO"
+            android:textColor="#00FFFF"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/wifiText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WiFi: [Connected]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/batteryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Battery: [100%] ██████████"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="16dp" />
+
+        <!-- Command Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="> COMMAND"
+            android:textColor="#00FFFF"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" />
+
+        <EditText
+            android:id="@+id/commandInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="[CMD]_"
+            android:textColorHint="#00FF0080"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:background="#001100"
+            android:padding="12dp"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+
+    </LinearLayout>
+
+</ScrollView>
