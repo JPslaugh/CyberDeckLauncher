@@ -27,6 +27,16 @@ public class MainActivity extends Activity {
     private TextView batteryText, wifiText, timeText;
     private EditText commandInput;
     private List<String> pinnedPackages;
+    private List<AppInfo> allApps;
+
+    private static class AppInfo {
+        String name;
+        String packageName;
+        AppInfo(String name, String packageName) {
+            this.name = name;
+            this.packageName = packageName;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +54,12 @@ public class MainActivity extends Activity {
         pinnedPackages = new ArrayList<>();
         pinnedPackages.add("com.spotify.music");
         pinnedPackages.add("org.connectbot");
-        pinnedPackages.add("com.android.chrome");
+        pinnedPackages.add("dev.imranr.obtainium.fdroid");
+        pinnedPackages.add("com.termux");
         pinnedPackages.add("com.android.settings");
+
+        // Load all installed apps
+        loadAllApps();
 
         loadPinnedApps();
         updateSystemInfo();
@@ -129,23 +143,96 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void executeCommand(String cmd) {
-        if (cmd.startsWith("open ")) {
-            String appName = cmd.substring(5).toLowerCase();
-            for (String pkg : pinnedPackages) {
-                try {
-                    String name = getPackageManager().getApplicationLabel(
-                        getPackageManager().getApplicationInfo(pkg, 0)).toString().toLowerCase();
-                    if (name.contains(appName)) {
-                        launchApp(pkg);
-                        return;
-                    }
-                } catch (Exception e) {}
-            }
-            Toast.makeText(this, "App not found", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "> " + cmd, Toast.LENGTH_SHORT).show();
+    private void loadAllApps() {
+        allApps = new ArrayList<>();
+        PackageManager pm = getPackageManager();
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> apps = pm.queryIntentActivities(mainIntent, 0);
+
+        for (ResolveInfo app : apps) {
+            String name = app.loadLabel(pm).toString();
+            String pkg = app.activityInfo.packageName;
+            allApps.add(new AppInfo(name, pkg));
         }
+    }
+
+    private void executeCommand(String cmd) {
+        String[] parts = cmd.trim().split("\\s+");
+        String command = parts[0].toLowerCase();
+
+        switch (command) {
+            case "help":
+            case "?":
+                showHelp();
+                break;
+            case "open":
+            case "launch":
+                if (parts.length > 1) {
+                    String appName = cmd.substring(command.length()).trim().toLowerCase();
+                    openApp(appName);
+                } else {
+                    Toast.makeText(this, "Usage: open <app>", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case "list":
+            case "ls":
+                listApps();
+                break;
+            case "reset":
+            case "clear":
+                loadPinnedApps();
+                Toast.makeText(this, "Launcher reset", Toast.LENGTH_SHORT).show();
+                break;
+            case "exit":
+            case "quit":
+                moveTaskToBack(true);
+                break;
+            case "time":
+                Toast.makeText(this, new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date()), Toast.LENGTH_SHORT).show();
+                break;
+            case "battery":
+            case "bat":
+                Toast.makeText(this, batteryText.getText(), Toast.LENGTH_LONG).show();
+                break;
+            default:
+                Toast.makeText(this, "Unknown command: " + command + "\nType 'help' for commands", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showHelp() {
+        String helpText = "Available commands:\n\n" +
+            "help, ?          - Show this help\n" +
+            "open <app>       - Launch an app\n" +
+            "list, ls         - List all apps\n" +
+            "reset, clear     - Reset launcher\n" +
+            "exit, quit       - Exit launcher\n" +
+            "time             - Show current time\n" +
+            "battery, bat     - Show battery info";
+
+        Toast.makeText(this, helpText, Toast.LENGTH_LONG).show();
+    }
+
+    private void openApp(String query) {
+        // Try to find matching app
+        for (AppInfo app : allApps) {
+            if (app.name.toLowerCase().contains(query)) {
+                launchApp(app.packageName);
+                return;
+            }
+        }
+        Toast.makeText(this, "App not found: " + query, Toast.LENGTH_SHORT).show();
+    }
+
+    private void listApps() {
+        StringBuilder sb = new StringBuilder("Installed apps:\n\n");
+        for (int i = 0; i < Math.min(allApps.size(), 10); i++) {
+            sb.append("• ").append(allApps.get(i).name).append("\n");
+        }
+        if (allApps.size() > 10) {
+            sb.append("\n... and ").append(allApps.size() - 10).append(" more");
+        }
+        Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
     }
 
     private void launchApp(String packageName) {
