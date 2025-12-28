@@ -23,7 +23,7 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
-    private LinearLayout pinnedAppsContainer;
+    private LinearLayout pinnedAppsContainer, allAppsContainer;
     private TextView batteryText, wifiText, timeText;
     private EditText commandInput;
     private List<String> pinnedPackages;
@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
 
         // Initialize views
         pinnedAppsContainer = findViewById(R.id.pinnedAppsContainer);
+        allAppsContainer = findViewById(R.id.allAppsContainer);
         batteryText = findViewById(R.id.batteryText);
         wifiText = findViewById(R.id.wifiText);
         timeText = findViewById(R.id.timeText);
@@ -62,6 +63,7 @@ public class MainActivity extends Activity {
         loadAllApps();
 
         loadPinnedApps();
+        loadAllAppsView();
         updateSystemInfo();
         setupCommandInput();
     }
@@ -88,15 +90,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        // Add "add app" button
-        TextView addButton = new TextView(this);
-        addButton.setText("[+] add app...");
-        addButton.setTextSize(16);
-        addButton.setTextColor(0xFF00FFFF); // Cyan
-        addButton.setPadding(20, 10, 20, 10);
-        addButton.setTypeface(android.graphics.Typeface.MONOSPACE);
-        addButton.setOnClickListener(v -> showAppPicker());
-        pinnedAppsContainer.addView(addButton);
     }
 
     private void updateSystemInfo() {
@@ -155,6 +148,26 @@ public class MainActivity extends Activity {
             String pkg = app.activityInfo.packageName;
             allApps.add(new AppInfo(name, pkg));
         }
+
+        // Sort alphabetically
+        java.util.Collections.sort(allApps, (a, b) -> a.name.compareToIgnoreCase(b.name));
+    }
+
+    private void loadAllAppsView() {
+        allAppsContainer.removeAllViews();
+
+        for (AppInfo app : allApps) {
+            TextView appView = new TextView(this);
+            appView.setText("[*] " + app.name.toLowerCase());
+            appView.setTextSize(14);
+            appView.setTextColor(0xFF00FF00); // Green
+            appView.setPadding(20, 8, 20, 8);
+            appView.setTypeface(android.graphics.Typeface.MONOSPACE);
+
+            appView.setOnClickListener(v -> launchApp(app.packageName));
+
+            allAppsContainer.addView(appView);
+        }
     }
 
     private void executeCommand(String cmd) {
@@ -181,7 +194,9 @@ public class MainActivity extends Activity {
                 break;
             case "reset":
             case "clear":
+                loadAllApps();
                 loadPinnedApps();
+                loadAllAppsView();
                 Toast.makeText(this, "Launcher reset", Toast.LENGTH_SHORT).show();
                 break;
             case "exit":
@@ -244,11 +259,6 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, "Failed to launch app", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void showAppPicker() {
-        // Simple implementation - show toast for now
-        Toast.makeText(this, "App picker - coming soon!", Toast.LENGTH_SHORT).show();
     }
 
     @Override

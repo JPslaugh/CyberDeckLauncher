@@ -56,6 +56,23 @@
             android:orientation="vertical"
             android:paddingBottom="16dp" />
 
+        <!-- All Apps Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="> ALL_APPS"
+            android:textColor="#00FFFF"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/allAppsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp" />
+
         <!-- System Info Section -->
         <TextView
             android:layout_width="match_parent"
