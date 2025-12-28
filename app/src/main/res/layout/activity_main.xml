@@ -30,6 +30,16 @@
             android:textColor="#00FF00"
             android:textSize="12sp"
             android:fontFamily="monospace"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="[2025-12-28]"
+            android:textColor="#00FF00"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
             android:paddingBottom="16dp" />
 
         <!-- Divider -->
@@ -99,6 +109,72 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Battery: [100%] ██████████"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/ramText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="RAM: [1024MB/2048MB] ██████████"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/storageText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Storage: [8.5GB free]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/uptimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uptime: [0d 0h 0m]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/ipText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IP: [192.168.1.xxx]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tempText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Temp: [--°C]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/networkText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Network: [TX: 0MB RX: 0MB]"
             android:textColor="#00FF00"
             android:textSize="14sp"
             android:fontFamily="monospace"

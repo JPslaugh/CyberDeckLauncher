@@ -8,13 +8,20 @@ import android.content.pm.ResolveInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
+import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.os.Environment;
+import android.os.StatFs;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,10 +31,12 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private LinearLayout pinnedAppsContainer, allAppsContainer;
-    private TextView batteryText, wifiText, timeText;
+    private TextView batteryText, wifiText, timeText, dateText, ramText, storageText, uptimeText, ipText, tempText, networkText;
     private EditText commandInput;
     private List<String> pinnedPackages;
     private List<AppInfo> allApps;
+    private long startRxBytes = 0;
+    private long startTxBytes = 0;
 
     private static class AppInfo {
         String name;
@@ -49,7 +58,18 @@ public class MainActivity extends Activity {
         batteryText = findViewById(R.id.batteryText);
         wifiText = findViewById(R.id.wifiText);
         timeText = findViewById(R.id.timeText);
+        dateText = findViewById(R.id.dateText);
+        ramText = findViewById(R.id.ramText);
+        storageText = findViewById(R.id.storageText);
+        uptimeText = findViewById(R.id.uptimeText);
+        ipText = findViewById(R.id.ipText);
+        tempText = findViewById(R.id.tempText);
+        networkText = findViewById(R.id.networkText);
         commandInput = findViewById(R.id.commandInput);
+
+        // Initialize network stats
+        startRxBytes = TrafficStats.getTotalRxBytes();
+        startTxBytes = TrafficStats.getTotalTxBytes();
 
         // Initialize pinned apps
         pinnedPackages = new ArrayList<>();
@@ -97,6 +117,10 @@ public class MainActivity extends Activity {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.US);
         timeText.setText(sdf.format(new Date()));
 
+        // Update date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        dateText.setText("[" + dateFormat.format(new Date()) + "]");
+
         // Update battery
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = registerReceiver(null, ifilter);
@@ -121,8 +145,134 @@ public class MainActivity extends Activity {
             wifiText.setText("WiFi: [Disconnected]");
         }
 
+        // Update RAM
+        updateRAM();
+
+        // Update Storage
+        updateStorage();
+
+        // Update Uptime
+        updateUptime();
+
+        // Update IP Address
+        updateIPAddress(wifiManager);
+
+        // Update CPU Temperature
+        updateTemperature();
+
+        // Update Network Stats
+        updateNetworkStats();
+
         // Update every second
         timeText.postDelayed(this::updateSystemInfo, 1000);
+    }
+
+    private void updateRAM() {
+        try {
+            android.app.ActivityManager activityManager = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            android.app.ActivityManager.MemoryInfo memoryInfo = new android.app.ActivityManager.MemoryInfo();
+            activityManager.getMemoryInfo(memoryInfo);
+
+            long totalMem = memoryInfo.totalMem / (1024 * 1024); // Convert to MB
+            long availMem = memoryInfo.availMem / (1024 * 1024); // Convert to MB
+            long usedMem = totalMem - availMem;
+
+            int usedPct = (int)((usedMem / (float)totalMem) * 100);
+            String bars = "";
+            int numBars = usedPct / 10;
+            for (int i = 0; i < 10; i++) {
+                bars += i < numBars ? "█" : "░";
+            }
+
+            ramText.setText("RAM: [" + usedMem + "MB/" + totalMem + "MB] " + bars);
+        } catch (Exception e) {
+            ramText.setText("RAM: [N/A]");
+        }
+    }
+
+    private void updateStorage() {
+        try {
+            StatFs stat = new StatFs(Environment.getDataDirectory().getPath());
+            long availBytes = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+            long totalBytes = stat.getBlockCountLong() * stat.getBlockSizeLong();
+
+            float availGB = availBytes / (1024.0f * 1024.0f * 1024.0f);
+            float totalGB = totalBytes / (1024.0f * 1024.0f * 1024.0f);
+
+            storageText.setText(String.format(Locale.US, "Storage: [%.1fGB/%.1fGB free]", availGB, totalGB));
+        } catch (Exception e) {
+            storageText.setText("Storage: [N/A]");
+        }
+    }
+
+    private void updateUptime() {
+        try {
+            long uptimeMillis = SystemClock.elapsedRealtime();
+            long days = uptimeMillis / (1000 * 60 * 60 * 24);
+            long hours = (uptimeMillis / (1000 * 60 * 60)) % 24;
+            long minutes = (uptimeMillis / (1000 * 60)) % 60;
+
+            uptimeText.setText(String.format(Locale.US, "Uptime: [%dd %dh %dm]", days, hours, minutes));
+        } catch (Exception e) {
+            uptimeText.setText("Uptime: [N/A]");
+        }
+    }
+
+    private void updateIPAddress(WifiManager wifiManager) {
+        try {
+            if (wifiManager.isWifiEnabled()) {
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                int ip = wifiInfo.getIpAddress();
+
+                String ipString = String.format(Locale.US, "%d.%d.%d.%d",
+                    (ip & 0xff),
+                    (ip >> 8 & 0xff),
+                    (ip >> 16 & 0xff),
+                    (ip >> 24 & 0xff));
+
+                ipText.setText("IP: [" + ipString + "]");
+            } else {
+                ipText.setText("IP: [No WiFi]");
+            }
+        } catch (Exception e) {
+            ipText.setText("IP: [N/A]");
+        }
+    }
+
+    private void updateTemperature() {
+        try {
+            // Try to read CPU temperature from thermal zone
+            File tempFile = new File("/sys/class/thermal/thermal_zone0/temp");
+            if (tempFile.exists()) {
+                RandomAccessFile reader = new RandomAccessFile(tempFile, "r");
+                String tempStr = reader.readLine();
+                reader.close();
+
+                int temp = Integer.parseInt(tempStr) / 1000; // Convert to Celsius
+                tempText.setText("Temp: [" + temp + "°C]");
+            } else {
+                tempText.setText("Temp: [--°C]");
+            }
+        } catch (Exception e) {
+            tempText.setText("Temp: [--°C]");
+        }
+    }
+
+    private void updateNetworkStats() {
+        try {
+            long currentRx = TrafficStats.getTotalRxBytes();
+            long currentTx = TrafficStats.getTotalTxBytes();
+
+            long rxBytes = currentRx - startRxBytes;
+            long txBytes = currentTx - startTxBytes;
+
+            float rxMB = rxBytes / (1024.0f * 1024.0f);
+            float txMB = txBytes / (1024.0f * 1024.0f);
+
+            networkText.setText(String.format(Locale.US, "Network: [TX: %.1fMB RX: %.1fMB]", txMB, rxMB));
+        } catch (Exception e) {
+            networkText.setText("Network: [N/A]");
+        }
     }
 
     private void setupCommandInput() {
