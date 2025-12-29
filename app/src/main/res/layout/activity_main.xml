@@ -138,6 +138,17 @@
             android:paddingBottom="4dp" />
 
         <TextView
+            android:id="@+id/sdCardText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SD Card: [Not detected]"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingLeft="20dp"
+            android:paddingBottom="4dp" />
+
+        <TextView
             android:id="@+id/uptimeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

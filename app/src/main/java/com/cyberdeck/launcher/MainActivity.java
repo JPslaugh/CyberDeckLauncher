@@ -31,7 +31,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
 
     private LinearLayout pinnedAppsContainer, allAppsContainer;
-    private TextView batteryText, wifiText, timeText, dateText, ramText, storageText, uptimeText, ipText, tempText, networkText;
+    private TextView batteryText, wifiText, timeText, dateText, ramText, storageText, sdCardText, uptimeText, ipText, tempText, networkText;
     private EditText commandInput;
     private List<String> pinnedPackages;
     private List<AppInfo> allApps;
@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
         dateText = findViewById(R.id.dateText);
         ramText = findViewById(R.id.ramText);
         storageText = findViewById(R.id.storageText);
+        sdCardText = findViewById(R.id.sdCardText);
         uptimeText = findViewById(R.id.uptimeText);
         ipText = findViewById(R.id.ipText);
         tempText = findViewById(R.id.tempText);
@@ -151,6 +152,9 @@ public class MainActivity extends Activity {
         // Update Storage
         updateStorage();
 
+        // Update SD Card
+        updateSDCard();
+
         // Update Uptime
         updateUptime();
 
@@ -202,6 +206,36 @@ public class MainActivity extends Activity {
             storageText.setText(String.format(Locale.US, "Storage: [%.1fGB/%.1fGB free]", availGB, totalGB));
         } catch (Exception e) {
             storageText.setText("Storage: [N/A]");
+        }
+    }
+
+    private void updateSDCard() {
+        try {
+            // Check for removable storage (SD card)
+            File[] externalDirs = getExternalFilesDirs(null);
+
+            if (externalDirs != null && externalDirs.length > 1 && externalDirs[1] != null) {
+                // SD card is at index 1 (index 0 is internal storage)
+                String sdPath = externalDirs[1].getAbsolutePath();
+                // Go up to the root of the SD card
+                while (!sdPath.endsWith("/Android")) {
+                    sdPath = new File(sdPath).getParent();
+                }
+                sdPath = new File(sdPath).getParent();
+
+                StatFs stat = new StatFs(sdPath);
+                long availBytes = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+                long totalBytes = stat.getBlockCountLong() * stat.getBlockSizeLong();
+
+                float availGB = availBytes / (1024.0f * 1024.0f * 1024.0f);
+                float totalGB = totalBytes / (1024.0f * 1024.0f * 1024.0f);
+
+                sdCardText.setText(String.format(Locale.US, "SD Card: [%.1fGB/%.1fGB free]", availGB, totalGB));
+            } else {
+                sdCardText.setText("SD Card: [Not detected]");
+            }
+        } catch (Exception e) {
+            sdCardText.setText("SD Card: [Not detected]");
         }
     }
 
