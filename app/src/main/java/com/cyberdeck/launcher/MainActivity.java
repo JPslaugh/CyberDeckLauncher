@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
 
     private void updateSystemInfo() {
         // Update time
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a", Locale.US);
         timeText.setText(sdf.format(new Date()));
 
         // Update date
@@ -388,7 +388,7 @@ public class MainActivity extends Activity {
                 moveTaskToBack(true);
                 break;
             case "time":
-                Toast.makeText(this, new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, new SimpleDateFormat("hh:mm:ss a", Locale.US).format(new Date()), Toast.LENGTH_SHORT).show();
                 break;
             case "battery":
             case "bat":
